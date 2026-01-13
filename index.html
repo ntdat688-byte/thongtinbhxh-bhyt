@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cổng Thông Tin Nhân Sự - BHXH & BHYT</title>
+    
+    <!-- Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons: Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuration for Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        royal: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb', // Royal Blue Primary
+                            700: '#1d4ed8',
+                        },
+                        indigo: {
+                            900: '#312e81',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                        'glow': '0 0 15px rgba(37, 99, 235, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Background Pattern */
+        body {
+            background-color: #f0f4f8;
+            background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
+            background-size: 32px 32px;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Input Icon Animation Logic */
+        .input-group:focus-within i {
+            transform: scale(1.25);
+            filter: drop-shadow(0 4px 6px rgba(37, 99, 235, 0.25));
+            color: #2563eb; /* Royal Blue */
+        }
+        
+        /* Smooth transitions for all interactive elements */
+        .transition-all-300 {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Button Hover Lift */
+        .btn-hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+        }
+        
+        /* Header Texture Overlay */
+        .header-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* Tab Active State */
+        .tab-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #2563eb;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* PRINT STYLES - Quan trọng cho việc xuất PDF */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            body * {
+                visibility: hidden;
+            }
+            #reviewContentContainer, #reviewContentContainer * {
+                visibility: visible;
+            }
+            #reviewContentContainer {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 20px;
+                background: white;
+                color: black;
+                border: none;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+            /* Đảm bảo bảng in đẹp */
+            td, th {
+                border-bottom: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-slate-600 flex items-center justify-center p-4 py-8">
+
+    <!-- Main Card Container (Hidden on Print) -->
+    <div class="glass-card rounded-3xl w-full max-w-5xl overflow-hidden relative flex flex-col shadow-soft no-print-section">
+        
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-700 via-royal-600 to-indigo-600 p-8 text-white relative header-pattern">
+            <div class="relative z-10">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold tracking-tight mb-2">Hồ Sơ Nhân Sự</h1>
+                        <p class="text-blue-100 text-sm md:text-base opacity-90">Thu thập thông tin BHXH, BHYT & Hồ sơ cá nhân</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <i class="fa-solid fa-file-shield text-5xl text-white opacity-20"></i>
+                    </div>
+                </div>
+            </div>
+            <!-- Decorative circle -->
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl pointer-events-none"></div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="px-6 py-4 bg-white/50 border-b border-slate-100 flex flex-wrap gap-2 justify-center md:justify-start">
+            <button onclick="switchTab(1)" id="tab-1" class="tab-btn active px-6 py-2 rounded-full text-sm font-semibold transition-all-300 border border-transparent hover:bg-slate-100 text-slate-500">
+                1. Thông Tin Cá Nhân
+            </button>
+            <button onclick="switchTab(2)" id="tab-2" class="tab-btn px-6 py-2 rounded-full text-sm font-semibold transition-all-300 border border-transparent hover:bg-slate-100 text-slate-500">
+                2. Chủ Hộ
+            </button>
+            <button onclick="switchTab(3)" id="tab-3" class="tab-btn px-6 py-2 rounded-full text-sm font-semibold transition-all-300 border border-transparent hover:bg-slate-100 text-slate-500">
+                3. Người Thân
+            </button>
+        </div>
+
+        <!-- Form Container -->
+        <form id="hrForm" class="p-6 md:p-10 space-y-8" onsubmit="handleFormSubmit(event)">
+            
+            <!-- SECTION I: Personal Info -->
+            <div id="section-1" class="form-section animate-fade-in">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold">I</div>
+                    <h2 class="text-xl font-bold text-slate-800">Thông Tin Cá Nhân</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Full Name -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Họ và Tên</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-user text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="hoTen" name="hoTen" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="Nguyễn Văn A">
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Số Điện Thoại</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-phone text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="tel" id="sdt" name="sdt" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="0909xxxxxx">
+                        </div>
+                    </div>
+
+                    <!-- CCCD -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Số CCCD</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-id-card text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="cccd" name="cccd" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="12 số trên thẻ">
+                        </div>
+                    </div>
+
+                    <!-- DOB -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Ngày Sinh</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-calendar text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="date" id="ngaySinh" name="ngaySinh" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Giới Tính</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-venus-mars text-slate-400 transition-all-300"></i>
+                            </div>
+                            <select id="gioiTinh" name="gioiTinh" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 text-slate-600 appearance-none">
+                                <option value="" disabled selected>Chọn giới tính</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nationality -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Quốc Tịch</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-globe text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="quocTich" name="quocTich" value="Việt Nam" class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                    <!-- Permanent Address -->
+                    <div class="input-group relative group md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Địa Chỉ Thường Trú (Theo VNeID)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-map-location-dot text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="diaChiThuongTru" name="diaChiThuongTru" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố">
+                        </div>
+                    </div>
+                    
+                    <!-- Hometown -->
+                     <div class="input-group relative group md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Quê Quán</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-house-chimney text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="queQuan" name="queQuan" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="Theo giấy khai sinh/CCCD">
+                        </div>
+                    </div>
+
+                    <!-- Issue Date CCCD -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Ngày Cấp CCCD</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-regular fa-calendar-check text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="date" id="ngayCapCCCD" name="ngayCapCCCD" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300">
+                        </div>
+                    </div>
+
+                     <!-- Expire Date CCCD -->
+                     <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Ngày Hết Hạn CCCD</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-regular fa-calendar-xmark text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="date" id="ngayHetHanCCCD" name="ngayHetHanCCCD" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300">
+                        </div>
+                    </div>
+
+                     <!-- Place of Issue -->
+                     <div class="input-group relative group md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Nơi Cấp</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-building-columns text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="noiCap" name="noiCap" required value="Cục Cảnh sát quản lý hành chính về trật tự xã hội" class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                    <!-- Bank Name -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Ngân Hàng</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-money-check-dollar text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="nganHang" name="nganHang" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="Vietcombank, Techcombank...">
+                        </div>
+                    </div>
+
+                    <!-- Bank Account -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Số Tài Khoản</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-hashtag text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="stk" name="stk" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                    <!-- BHXH -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Mã Số BHXH (Nếu có)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-umbrella text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="maBHXH" name="maBHXH" class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="Bỏ trống nếu chưa làm">
+                        </div>
+                    </div>
+
+                    <!-- BHYT -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Mã Số BHYT (Nếu có)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-notes-medical text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="maBHYT" name="maBHYT" class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="Bỏ trống nếu chưa có/hết hạn">
+                        </div>
+                    </div>
+
+                    <!-- Hospital -->
+                    <div class="input-group relative group md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Nơi Đăng Kí Khám Chữa Bệnh (KCBBĐ)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-hospital text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="noiDKKCB" name="noiDKKCB" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="VD: Bệnh viện Quận 1, Bệnh viện Thống Nhất...">
+                        </div>
+                    </div>
+
+                    <!-- Job Title -->
+                    <div class="input-group relative group md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Chức Danh</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-user-tie text-slate-400 transition-all-300"></i>
+                            </div>
+                            <select id="chucDanh" name="chucDanh" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 text-slate-600 appearance-none">
+                                <option value="" disabled selected>Chọn chức danh</option>
+                                <option value="Giáo Viên">Giáo Viên</option>
+                                <option value="Trợ Giảng">Trợ Giảng</option>
+                            </select>
+                             <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button type="button" onclick="nextTab()" class="btn-hover-lift bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold py-3 px-8 rounded-full shadow-lg flex items-center gap-2">
+                        Tiếp tục <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION II: Household Head -->
+            <div id="section-2" class="form-section hidden animate-fade-in">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">II</div>
+                    <h2 class="text-xl font-bold text-slate-800">Thông Tin Chủ Hộ</h2>
+                </div>
+
+                <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl mb-6 text-sm text-blue-700 flex gap-3">
+                    <i class="fa-solid fa-circle-info mt-1"></i>
+                    <p>Xem thông tin trong Sổ Hộ Khẩu. Người đứng tên chủ hộ.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Head Name -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Họ Tên Chủ Hộ</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-user-shield text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="chuHo_hoTen" name="chuHo_hoTen" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                     <!-- Head CCCD -->
+                     <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Số CCCD Chủ Hộ</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-id-card text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="chuHo_cccd" name="chuHo_cccd" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                     <!-- Head DOB -->
+                     <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Ngày Sinh Chủ Hộ</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-calendar text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="date" id="chuHo_ngaySinh" name="chuHo_ngaySinh" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300">
+                        </div>
+                    </div>
+
+                    <!-- Head Issue Date -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Ngày Cấp CCCD Chủ Hộ</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-calendar-check text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="date" id="chuHo_ngayCap" name="chuHo_ngayCap" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300">
+                        </div>
+                    </div>
+
+                    <!-- Head Address -->
+                    <div class="input-group relative group md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Địa Chỉ Thường Trú Chủ Hộ</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-map-location-dot text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="chuHo_diaChi" name="chuHo_diaChi" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                    <!-- Relation -->
+                    <div class="input-group relative group md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Mối Quan Hệ Của Mình Với Chủ Hộ</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-people-arrows text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="chuHo_quanHe" name="chuHo_quanHe" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="VD: Con ruột, Vợ, Chồng...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between">
+                     <button type="button" onclick="prevTab()" class="text-slate-500 font-semibold py-3 px-6 hover:text-blue-600 transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
+                    </button>
+                    <button type="button" onclick="nextTab()" class="btn-hover-lift bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold py-3 px-8 rounded-full shadow-lg flex items-center gap-2">
+                        Tiếp tục <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION III: Other Member -->
+            <div id="section-3" class="form-section hidden animate-fade-in">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">III</div>
+                    <h2 class="text-xl font-bold text-slate-800">Thông Tin Một Thành Viên Khác</h2>
+                </div>
+                 <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-xl mb-6 text-sm text-emerald-700 flex gap-3">
+                    <i class="fa-solid fa-users mt-1"></i>
+                    <p>Chọn một người khác trong gia đình (KHÔNG TRÙNG với Chủ Hộ). VD: Nếu chủ hộ là Ba, thì ghi Mẹ hoặc Anh/Chị.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Member Name -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Họ Tên Người Thân</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-user text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="nt_hoTen" name="nt_hoTen" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                     <!-- Member CCCD -->
+                     <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Số CCCD</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-id-card text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="nt_cccd" name="nt_cccd" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                     <!-- Member DOB -->
+                     <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Ngày Sinh</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-calendar text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="date" id="nt_ngaySinh" name="nt_ngaySinh" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300">
+                        </div>
+                    </div>
+
+                    <!-- Member Issue Date -->
+                    <div class="input-group relative group">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Ngày Cấp CCCD</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-calendar-check text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="date" id="nt_ngayCap" name="nt_ngayCap" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300">
+                        </div>
+                    </div>
+
+                    <!-- Member Address -->
+                    <div class="input-group relative group md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Địa Chỉ Thường Trú</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-map-location-dot text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="nt_diaChi" name="nt_diaChi" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400">
+                        </div>
+                    </div>
+
+                    <!-- Relation -->
+                    <div class="input-group relative group md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 ml-1">Mối Quan Hệ Của Mình Với Người Này</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-heart text-slate-400 transition-all-300"></i>
+                            </div>
+                            <input type="text" id="nt_quanHe" name="nt_quanHe" required class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-transparent transition-all-300 placeholder-slate-400" placeholder="VD: Mẹ ruột, Anh ruột, Em ruột...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <button type="button" onclick="prevTab()" class="text-slate-500 font-semibold py-3 px-6 hover:text-blue-600 transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
+                    </button>
+                    <button type="submit" id="submitBtn" class="btn-hover-lift bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-3 px-10 rounded-full shadow-lg flex items-center gap-2">
+                        <span>Gửi Hồ Sơ</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center hidden no-print">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"></div>
+        <div class="glass-card p-8 rounded-3xl max-w-sm w-full mx-4 text-center transform transition-all scale-100 relative z-10 shadow-2xl">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
+                <i class="fa-solid fa-check text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Gửi Thành Công!</h3>
+            <p class="text-slate-500 mb-6">Thông tin của bạn đã được ghi nhận.</p>
+            
+            <div class="space-y-3">
+                <button onclick="showReviewModal()" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors shadow-lg flex justify-center items-center gap-2">
+                   <i class="fa-solid fa-file-pdf"></i> Xem lại & Tải PDF
+                </button>
+                <button onclick="window.location.reload()" class="w-full bg-slate-100 text-slate-600 font-semibold py-3 px-4 rounded-xl hover:bg-slate-200 transition-colors">
+                    Nhập form mới
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Modal for PDF -->
+    <div id="reviewModal" class="fixed inset-0 z-[60] flex items-start justify-center hidden overflow-auto py-10">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity no-print" onclick="closeReviewModal()"></div>
+        
+        <!-- Document Container (A4 Style) -->
+        <div id="reviewContentContainer" class="bg-white relative z-10 w-full max-w-2xl mx-4 shadow-2xl p-10 min-h-[297mm]">
+            <!-- Print Controls -->
+            <div class="no-print flex justify-between items-center mb-8 border-b pb-4">
+                <h3 class="text-lg font-bold text-slate-700">Xem trước bản in</h3>
+                <div class="flex gap-2">
+                     <button onclick="closeReviewModal()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i> Đóng & Sửa
+                    </button>
+                    <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-bold shadow-md transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i> In / Lưu PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content to Print -->
+            <div class="text-black space-y-6 font-serif">
+                <div class="text-center border-b-2 border-black pb-4 mb-6">
+                    <h1 class="text-2xl font-bold uppercase">HỒ SƠ NHÂN SỰ</h1>
+                    <p class="italic mt-1">Tổng hợp thông tin BHXH, BHYT & Cá nhân</p>
+                </div>
+
+                <!-- Section I Review -->
+                <div>
+                    <h2 class="font-bold text-lg border-b border-gray-400 mb-3 pb-1 uppercase">I. Thông Tin Cá Nhân</h2>
+                    <table class="w-full text-sm">
+                        <tbody id="review-body-1" class="divide-y divide-gray-100">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Section II Review -->
+                <div>
+                    <h2 class="font-bold text-lg border-b border-gray-400 mb-3 pb-1 mt-6 uppercase">II. Thông Tin Chủ Hộ</h2>
+                    <table class="w-full text-sm">
+                        <tbody id="review-body-2" class="divide-y divide-gray-100">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Section III Review -->
+                <div>
+                    <h2 class="font-bold text-lg border-b border-gray-400 mb-3 pb-1 mt-6 uppercase">III. Thông Tin Người Thân</h2>
+                    <table class="w-full text-sm">
+                        <tbody id="review-body-3" class="divide-y divide-gray-100">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-12 pt-8 border-t border-gray-300 flex justify-between text-sm italic">
+                    <p>Ngày tạo: <span id="reviewDate"></span></p>
+                    <p>Chữ ký người khai</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Tab Switching Logic ---
+        let currentTab = 1;
+        const totalTabs = 3;
+
+        function switchTab(tabIndex) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.id === `tab-${tabIndex}`) btn.classList.add('active');
+            });
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            const selectedSection = document.getElementById(`section-${tabIndex}`);
+            selectedSection.classList.remove('hidden');
+            currentTab = tabIndex;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextTab() {
+            if(validateSection(currentTab)) {
+                if (currentTab < totalTabs) switchTab(currentTab + 1);
+            }
+        }
+        function prevTab() {
+            if (currentTab > 1) switchTab(currentTab - 1);
+        }
+
+        // --- 2. Validation ---
+        function validateSection(sectionIndex) {
+            const section = document.getElementById(`section-${sectionIndex}`);
+            const inputs = section.querySelectorAll('input[required], select[required]');
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.classList.add('ring-2', 'ring-red-500');
+                    input.addEventListener('input', () => input.classList.remove('ring-2', 'ring-red-500'));
+                }
+            });
+            if (!isValid) alert("Vui lòng điền đầy đủ các thông tin bắt buộc!");
+            return isValid;
+        }
+
+        // --- 3. Submit Logic ---
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEJ0OV-OR4QQgz5yoZf-LCy5LwroJoutmue_PPpIwmr1e4iCqEiRHWTxlEh30nX1mt/exec"; 
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            if(!validateSection(3)) return;
+
+            const btn = document.getElementById('submitBtn');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<div class="loader mr-2"></div> Đang gửi...`;
+            btn.disabled = true;
+
+            const form = document.getElementById('hrForm');
+            const formData = new FormData(form);
+            
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors' 
+                });
+                
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                showSuccess();
+            } catch (error) {
+                console.error("Lỗi:", error);
+                alert("Có lỗi xảy ra: " + error.message);
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        }
+
+        function showSuccess() {
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        // --- 4. Review PDF Logic ---
+        function getValue(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : "---";
+        }
+
+        function addRow(label, value) {
+            return `<tr><td class="font-semibold text-gray-600 w-1/3 py-2">${label}:</td><td class="py-2">${value}</td></tr>`;
+        }
+
+        function showReviewModal() {
+            // Populate Review Data
+            const review1 = document.getElementById('review-body-1');
+            review1.innerHTML = 
+                addRow("Họ Tên", getValue("hoTen")) +
+                addRow("SĐT", getValue("sdt")) +
+                addRow("CCCD", getValue("cccd")) +
+                addRow("Ngày Sinh", getValue("ngaySinh")) +
+                addRow("Giới Tính", getValue("gioiTinh")) +
+                addRow("Quốc Tịch", getValue("quocTich")) +
+                addRow("Đ/C Thường Trú", getValue("diaChiThuongTru")) +
+                addRow("Quê Quán", getValue("queQuan")) +
+                addRow("Ngày Cấp CCCD", getValue("ngayCapCCCD")) +
+                addRow("Ngày Hết Hạn", getValue("ngayHetHanCCCD")) +
+                addRow("Nơi Cấp", getValue("noiCap")) +
+                addRow("Ngân Hàng", getValue("nganHang")) +
+                addRow("STK", getValue("stk")) +
+                addRow("Mã BHXH", getValue("maBHXH")) +
+                addRow("Mã BHYT", getValue("maBHYT")) +
+                addRow("Nơi ĐK KCB", getValue("noiDKKCB")) +
+                addRow("Chức Danh", getValue("chucDanh"));
+
+            const review2 = document.getElementById('review-body-2');
+            review2.innerHTML = 
+                addRow("Chủ Hộ", getValue("chuHo_hoTen")) +
+                addRow("CCCD", getValue("chuHo_cccd")) +
+                addRow("Ngày Sinh", getValue("chuHo_ngaySinh")) +
+                addRow("Ngày Cấp", getValue("chuHo_ngayCap")) +
+                addRow("Địa Chỉ", getValue("chuHo_diaChi")) +
+                addRow("Quan Hệ", getValue("chuHo_quanHe"));
+
+            const review3 = document.getElementById('review-body-3');
+            review3.innerHTML = 
+                addRow("Người Thân", getValue("nt_hoTen")) +
+                addRow("CCCD", getValue("nt_cccd")) +
+                addRow("Ngày Sinh", getValue("nt_ngaySinh")) +
+                addRow("Ngày Cấp", getValue("nt_ngayCap")) +
+                addRow("Địa Chỉ", getValue("nt_diaChi")) +
+                addRow("Quan Hệ", getValue("nt_quanHe"));
+
+            // Set Date
+            const now = new Date();
+            document.getElementById('reviewDate').innerText = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+
+            // Show Modal
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            // Close review, allowing user to edit form
+            document.getElementById('reviewModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
